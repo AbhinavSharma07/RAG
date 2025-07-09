@@ -1,4 +1,4 @@
-# 🔍 Advanced Full-Stack RAG (Retrieval-Augmented Generation) Application
+# 🔍 Advanced RAG (Retrieval-Augmented Generation) Application
 
 This is a production-grade, full-stack RAG application that allows users to upload documents (PDFs), ask natural language questions, and get answers grounded in those documents — powered by OpenAI, FAISS, ElasticSearch, and a React-based chat UI.
 
