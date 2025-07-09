@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-openai
-python-dotenv
-pypdf2
-pinecone-client
-faiss-cpu
-httpx
