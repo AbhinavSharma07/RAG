@@ -25,13 +25,13 @@ This is a production-grade, full-stack RAG application that allows users to uplo
 
 | Layer      | Tech                             |
 |------------|----------------------------------|
+| Frontend   | React + TypeScript + Vite        |
 | Backend    | FastAPI + Python                 |
 | Embeddings | OpenAI API (fallback: HF models) |
 | Retrieval  | FAISS + ElasticSearch (BM25)     |
 | Streaming  | WebSockets + Token Streaming     |
 | DevOps     | Docker, Docker Compose           |
 | Monitoring | Prometheus + Grafana             |
-
 ---
 
 ## 🐳 Build and run with Docker
