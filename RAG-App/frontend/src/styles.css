@@ -1,0 +1,26 @@
+body {
+  font-family: sans-serif;
+  padding: 2rem;
+  background: #f8f9fa;
+}
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+.upload, .chat {
+  margin-bottom: 2rem;
+}
+.chat div {
+  margin: 0.5rem 0;
+  background: #fff;
+  padding: 0.5rem;
+  border-radius: 5px;
+}
+input {
+  padding: 0.5rem;
+  width: 70%;
+}
+button {
+  padding: 0.5rem;
+  margin-left: 0.5rem;
+}
