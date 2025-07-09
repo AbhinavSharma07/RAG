@@ -1,0 +1,12 @@
+# OpenAI API
+OPENAI_API_KEY=your_openai_api_key
+
+# ElasticSearch
+ELASTIC_URL=http://elasticsearch:9200
+ELASTIC_USERNAME=elastic
+ELASTIC_PASSWORD=changeme
+
+# FAISS (no config needed — runs in-memory)
+
+# Frontend
+VITE_API_URL=http://localhost:8000
