@@ -1,10 +1,54 @@
-version: "3.9"
+version: "3.8"
+
 services:
   backend:
     build: ./backend
+    container_name: rag-backend
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
     environment:
-      - OPENAI_API_KEY=your_openai_key_here
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ELASTIC_URL=${ELASTIC_URL}
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    depends_on:
+      - elasticsearch
+
+  frontend:
+    build: ./frontend
+    container_name: rag-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+    depends_on:
+      - backend
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.2
+    container_name: rag-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+  grafana:
+    image: grafana/grafana
+    container_name: rag-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+volumes:
+  esdata:
+  grafana-storage:
