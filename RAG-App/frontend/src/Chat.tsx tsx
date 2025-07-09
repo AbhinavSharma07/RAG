@@ -1,0 +1,43 @@
+import React, { useState } from 'react';
+
+export default function Chat() {
+  const [input, setInput] = useState('');
+  const [chat, setChat] = useState<string[]>([]);
+  const [streaming, setStreaming] = useState(false);
+
+  const sendQuery = () => {
+    const ws = new WebSocket('ws://localhost:8000/ws/chat');
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ question: input }));
+      setChat((c) => [...c, `🧠 You: ${input}`, '🤖 Bot: ']);
+      setStreaming(true);
+    };
+
+    ws.onmessage = (ev) => {
+      const { token } = JSON.parse(ev.data);
+      setChat((c) => {
+        const last = c[c.length - 1] + token;
+        return [...c.slice(0, -1), last];
+      });
+    };
+
+    ws.onclose = () => {
+      setStreaming(false);
+    };
+  };
+
+  return (
+    <div className="chat">
+      {chat.map((msg, i) => (
+        <div key={i}>{msg}</div>
+      ))}
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Ask a question..."
+      />
+      <button onClick={sendQuery} disabled={streaming}>Ask</button>
+    </div>
+  );
+}
