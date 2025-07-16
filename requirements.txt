@@ -1,13 +1,33 @@
+# Core LLM & RAG Libraries
 transformers>=4.30.0
-faiss-cpu>=1.7.2
-datasets>=2.10.0
 torch>=2.0.0
 sentence-transformers>=2.2.2
-scikit-learn>=1.2.2
+langchain>=0.2.0
+
+# Vector store
+faiss-cpu>=1.7.2
+
+# Optional: If using HuggingFace datasets
+datasets>=2.10.0
+
+# Utilities & Metrics
 numpy>=1.24.0
+scikit-learn>=1.2.2
 tqdm>=4.65.0
-flask>=2.3.0
 pandas>=1.5.3
-elasticsearch>=8.6.0
-langchain>=0.0.250
-haystack>=1.22.0
+
+# Document Parsing
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+
+# UI Framework
+streamlit>=1.22.0
+
+# OpenAI Integration
+openai>=1.0.0
+
+# Hugging Face Model Hub access (for LLaMA, Falcon etc.)
+huggingface-hub>=0.15.1
+
+# Optional: For evaluation / logging
+trulens-eval>=0.17.0  # or LangChainEval

@@ -113,3 +113,125 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+### or we can #####
+
+import os
+import faiss
+import streamlit as st
+import pickle
+from typing import List
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+from langchain.llms import OpenAI, HuggingFaceHub
+from PyPDF2 import PdfReader
+
+# ---------------- Configuration ---------------- #
+EMBED_MODEL = "all-MiniLM-L6-v2"
+INDEX_PATH = "vectorstore"
+DOCS_PATH = "docs.pkl"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")  # Set in env or .env
+
+# ---------------- Document Upload ---------------- #
+def load_uploaded_file(uploaded_file):
+    if uploaded_file.type == "application/pdf":
+        reader = PdfReader(uploaded_file)
+        text = "\n".join([page.extract_text() for page in reader.pages if page.extract_text()])
+    else:
+        text = uploaded_file.read().decode("utf-8")
+    return text
+
+# ---------------- Embedding Model ---------------- #
+def get_embedding_model():
+    return HuggingFaceEmbeddings(model_name=EMBED_MODEL)
+
+# ---------------- Vector Store ---------------- #
+def build_vectorstore(documents: List[str], metadatas: List[dict], persist=True):
+    embeddings = get_embedding_model()
+    db = FAISS.from_texts(documents, embedding=embeddings, metadatas=metadatas)
+    if persist:
+        db.save_local(INDEX_PATH)
+        with open(DOCS_PATH, "wb") as f:
+            pickle.dump(list(zip(documents, metadatas)), f)
+    return db
+
+def load_vectorstore():
+    if os.path.exists(f"{INDEX_PATH}/index.faiss"):
+        return FAISS.load_local(INDEX_PATH, get_embedding_model())
+    return None
+
+# ---------------- LLM Selection ---------------- #
+def get_llm(source="OpenAI", temperature=0.2):
+    if source == "OpenAI":
+        return OpenAI(temperature=temperature, openai_api_key=OPENAI_API_KEY)
+    else:
+        return HuggingFaceHub(repo_id="tiiuae/falcon-7b-instruct", model_kwargs={"temperature": temperature})
+
+# ---------------- RAG Chain ---------------- #
+def build_rag_chain(llm, vectorstore, top_k):
+    retriever = vectorstore.as_retriever(search_kwargs={"k": top_k})
+    prompt_template = """
+Use the following context to answer the question.
+If the answer isn't found, say "I don't know."
+
+Context:
+{context}
+
+Question: {question}
+Answer:"""
+    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+    return RetrievalQA.from_chain_type(llm=llm, retriever=retriever, chain_type_kwargs={"prompt": prompt})
+
+# ---------------- Streamlit App ---------------- #
+def main():
+    st.set_page_config("🧠 RAG Q&A", layout="wide")
+    st.title("🔍 Retrieval-Augmented Q&A App")
+    
+    # Sidebar
+    with st.sidebar:
+        st.header("⚙️ Settings")
+        llm_source = st.selectbox("LLM Source", ["OpenAI", "HuggingFace"])
+        top_k = st.slider("Top-k Documents", 1, 5, 3)
+        temperature = st.slider("LLM Temperature", 0.0, 1.0, 0.2)
+        st.markdown("---")
+        uploaded_files = st.file_uploader("Upload files", type=["pdf", "txt"], accept_multiple_files=True)
+
+    # Load or create vectorstore
+    vectorstore = load_vectorstore()
+    if uploaded_files:
+        texts = []
+        metas = []
+        for file in uploaded_files:
+            text = load_uploaded_file(file)
+            texts.append(text)
+            metas.append({"filename": file.name})
+        vectorstore = build_vectorstore(texts, metas)
+        st.success("📚 Documents processed and added to FAISS index.")
+
+    if not vectorstore:
+        st.warning("Please upload documents to start.")
+        return
+
+    llm = get_llm(source=llm_source, temperature=temperature)
+    qa_chain = build_rag_chain(llm, vectorstore, top_k)
+
+    # Main interface
+    query = st.text_input("Ask your question here:")
+    if query:
+        with st.spinner("Thinking..."):
+            answer = qa_chain.run(query)
+        st.success(answer)
+
+        with st.expander("📄 Retrieved Contexts"):
+            docs = vectorstore.similarity_search(query, k=top_k)
+            for i, doc in enumerate(docs, 1):
+                st.markdown(f"**Doc {i} — {doc.metadata.get('filename', '')}**")
+                st.markdown(doc.page_content[:300] + "…")
+
+if __name__ == "__main__":
+    main()
