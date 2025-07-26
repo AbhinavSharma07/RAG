@@ -1,0 +1,43 @@
++-------------------+
+| 1. User Uploads   |
+|    PDF Document   |
++-------------------+
+           ↓
++-----------------------------+
+| 2. Document Ingestion       |
+| - Read with PyMuPDF         |
+| - Chunk with LangChain      |
++-----------------------------+
+           ↓
++------------------------------+
+| 3. Text Embedding            |
+| - Model: all-MiniLM-L6-v2    |
+| - Library: HuggingFace       |
++------------------------------+
+           ↓
++------------------------+
+| 4. Vector DB (FAISS)   |
+| - Store local vectors  |
+| - Enable similarity    |
++------------------------+
+           ↓
++-------------------------------+
+| 5. Semantic Retrieval         |
+| - Top-K similar chunks        |
++-------------------------------+
+           ↓
++-------------------------------+
+| 6. Prompt Construction        |
+| - Custom template             |
+| - Inject context + query      |
++-------------------------------+
+           ↓
++----------------------------+
+| 7. LLM Response Generation |
+| - OpenAI GPT-4             |
++----------------------------+
+           ↓
++---------------------+
+| 8. Answer Displayed |
+| - Streamlit Output  |
++---------------------+
